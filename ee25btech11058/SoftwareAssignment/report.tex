@@ -1,0 +1,321 @@
+\let\negmedspace\undefined
+\let\negthickspace\undefined
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{tfrupee}
+\setlength{\headheight}{15pt}
+\setlength{\headsep}{0.5cm}
+
+\usepackage{gvv-book}
+\usepackage{gvv}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{array,longtable,multirow,hhline}
+\usepackage{mathtools}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage{txfonts}
+\usepackage{tkz-euclide}
+\usepackage{gensymb}
+\usepackage{listings}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{float}
+
+\renewcommand{\baselinestretch}{1.25}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\textbf{SOFTWARE ASSIGNMENT}\\
+\vspace{1cm}
+{\Huge \textbf{Image Compression using Singular Value Decomposition (SVD)} \par}\\
+\vspace{2cm}
+\Large{EE25BTECH11058 – Tangellapalli Mohana Krishna Sushma}\\[1em]
+\textbf{Date:} \today
+\end{titlepage}
+
+\section*{Summary of Prof. Gilbert Strang’s Lecture on Singular Value Decomposition}
+
+Prof. Gilbert Strang’s lecture provides a detailed understanding of how the \textbf{Singular Value Decomposition (SVD)} breaks any real matrix into simpler, meaningful parts. He explains that every matrix $\myvec{A}$ represents a linear transformation that stretches, rotates, or reflects vectors in space.  
+
+The SVD is expressed as:
+\begin{equation}
+\myvec{A} = \myvec{U}\myvec{\Sigma}\myvec{V}^T
+\end{equation}
+
+Here, $\myvec{U}$ and $\myvec{V}$ are orthogonal matrices, while $\myvec{\Sigma}$ is a diagonal matrix containing the singular values $\sigma_1, \sigma_2, \dots$.  
+The singular values describe the magnitude of stretching in each principal direction. The columns of $\myvec{V}$ indicate input directions, while $\myvec{U}$ defines corresponding output directions.
+
+Strang emphasizes that SVD can be understood geometrically — $\myvec{A}$ maps a unit sphere into an ellipsoid whose axes are scaled by $\sigma_i$ and oriented by $\myvec{u_i}$ and $\myvec{v_i}$. He shows that:
+\begin{equation}
+\myvec{A}^T\myvec{A}\myvec{v_i} = \sigma_i^2 \myvec{v_i}
+\end{equation}
+and that the left singular vectors are obtained as:
+\begin{equation}
+\myvec{u_i} = \frac{\myvec{A}\myvec{v_i}}{\sigma_i}
+\end{equation}
+
+By keeping only the top $k$ singular values, we obtain a rank-$k$ approximation:
+\begin{equation}
+\myvec{A_k} = \sum_{i=1}^{k} \sigma_i \myvec{u_i}\myvec{v_i}^T
+\end{equation}
+
+This provides the best low-rank approximation of $\myvec{A}$ under the Frobenius norm.  
+Prof. Strang connects this to image compression, where a large image matrix can be approximated using only a few dominant singular values, effectively reducing storage without significant loss of detail.
+
+\section*{Objective}
+
+The goal of this project is to implement an image compression algorithm using the Truncated Singular Value Decomposition (SVD) in C.  
+The objective is to reconstruct multiple grayscale images for different truncation levels $k$ and to study the trade-off between compression ratio and reconstruction error.
+
+\section{Theory}
+
+For any matrix $\myvec{A} \in \mathbb{R}^{m \times n}$:
+\begin{equation}
+\myvec{A} = \myvec{U}\myvec{\Sigma}\myvec{V}^T
+\end{equation}
+
+The diagonal matrix $\myvec{\Sigma}$ contains singular values in descending order $\sigma_1 \ge \sigma_2 \ge \dots \ge 0$.  
+The matrices $\myvec{U}$ and $\myvec{V}$ are orthogonal, satisfying:
+\begin{equation}
+\myvec{U}^T\myvec{U} = \myvec{I}, \qquad \myvec{V}^T\myvec{V} = \myvec{I}
+\end{equation}
+
+A truncated rank-$k$ version is given by:
+\begin{equation}
+\myvec{A_k} = \sum_{i=1}^{k} \sigma_i \myvec{u_i}\myvec{v_i}^T
+\end{equation}
+
+The reconstruction error is measured using the Frobenius norm:
+\begin{equation}
+E_k = \norm{\myvec{A} - \myvec{A_k}}_F
+\end{equation}
+
+\section{Algorithm Used}
+
+The implementation is based on the \textbf{Power Iteration Method with Deflation}.  
+This method iteratively estimates dominant singular vectors and values. Once one singular component is found, its contribution is subtracted from $\myvec{A}$ and the process continues for the next.
+
+Steps:
+\begin{enumerate}[label=\arabic*.]
+\item Start with a random unit vector $\myvec{v}$.
+\item Compute $\myvec{u} = \frac{\myvec{A}\myvec{v}}{\norm{\myvec{A}\myvec{v}}}$.
+\item Update $\myvec{v} = \frac{\myvec{A}^T\myvec{u}}{\norm{\myvec{A}^T\myvec{u}}}$.
+\item Compute the singular value $\sigma = \myvec{u}^T\myvec{A}\myvec{v}$.
+\item Subtract the component $\sigma\myvec{u}\myvec{v}^T$ from $\myvec{A}$ (deflation).
+\item Repeat for the desired number of singular values.
+\end{enumerate}
+
+This procedure was applied to three images using $k = 5, 10, 20, 50,$ and $100$.
+
+\section{Results}
+
+\textbf{Input Images:}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\linewidth]{figure/input/image1.png}
+\includegraphics[width=0.3\linewidth]{figure/input/image2.jpg}
+\includegraphics[width=0.3\linewidth]{figure/input/image3.png}
+\caption{Input grayscale images used for testing.}
+\end{figure}
+
+\textbf{Reconstructed Outputs for Image 1:}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.22\linewidth]{figure/output/image1k5.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image1k20.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image1k50.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image1k100.png}
+\caption{Reconstructed Image 1 for different values of $k$.}
+\end{figure}
+
+\textbf{Reconstructed Outputs for Image 2:}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.22\linewidth]{figure/output/image2k5.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image2k20.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image2k50.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image2k100.png}
+\caption{Reconstructed Image 2 for different values of $k$.}
+\end{figure}
+
+\textbf{Reconstructed Outputs for Image 3:}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.22\linewidth]{figure/output/image3k5.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image3k20.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image3k50.png}
+\includegraphics[width=0.22\linewidth]{figure/output/image3k100.png}
+\caption{Reconstructed Image 3 for different values of $k$.}
+\end{figure}
+
+\textbf{Frobenius Error (from Execution Results):}
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+$k$ & Image 1 Error & Image 2 Error & Image 3 Error \\ \hline
+5 & 4713.582 & 20704.275 & 11146.309 \\
+10 & 3249.147 & 15060.936 & 7176.804 \\
+20 & 2126.559 & 10634.413 & 3808.193 \\
+50 & 880.503 & 6185.642 & 1160.127 \\
+100 & 164.781 & 3672.902 & 512.346 \\ \hline
+\end{tabular}
+\caption{Frobenius errors for different $k$ values across all three images.}
+\end{table}
+
+\section*{Discussion}
+
+From the results, it is clear that increasing $k$ improves reconstruction accuracy but reduces compression.  
+For all three images, the Frobenius error decreases rapidly as $k$ increases, which shows that the dominant singular values carry most of the image information.  
+Images with smoother textures compress more efficiently, while detailed or high-contrast images (like image2.jpg) require higher $k$ to maintain visual quality.
+
+
+\section*{Comparison of Algorithms and Justification of Choice}
+
+Several algorithms can compute the truncated Singular Value Decomposition (SVD) of a matrix $\myvec{A}$.  
+Each method offers different trade-offs in terms of computational complexity, stability, and ease of implementation.  
+Below, we discuss six common approaches and explain the rationale for selecting the Power Iteration with Deflation technique for this project.
+
+\subsection*{1. Full SVD + Truncation}
+
+The classical method computes the complete decomposition
+\begin{align}
+\myvec{A} = \myvec{U}\myvec{\Sigma}\myvec{V}^{\top}
+\end{align}
+using a stable algorithm such as the Golub–Reinsch procedure.  
+Once all singular values $\sigma_1, \sigma_2, \dots, \sigma_r$ are obtained, the truncated rank-$k$ approximation is given by
+\begin{align}
+\myvec{A_k} = \sum_{i=1}^{k}\sigma_i \myvec{u_i}\myvec{v_i}^{\top}
+\end{align}
+This method provides maximum accuracy and numerical stability, since it captures all singular components and discards only after computation.  
+However, it has high computational cost ($O(mn\min(m,n))$) and memory usage, which makes it inefficient for large image matrices.  
+It is the most reliable for software libraries like LAPACK but not feasible to implement manually in C without numerical packages.
+
+\subsection*{2. Power Iteration Method}
+
+The Power Iteration is a simple iterative technique to estimate the largest singular value and corresponding vectors.  
+It works by repeatedly applying $\myvec{A}^{\top}\myvec{A}$ to a random vector until convergence:
+\begin{align}
+\myvec{v}_{i+1} = \frac{\myvec{A}^{\top}\myvec{A}\myvec{v}_i}{\norm{\myvec{A}^{\top}\myvec{A}\myvec{v}_i}}
+\end{align}
+Once $\myvec{v}$ converges, the left singular vector is computed as
+\begin{align}
+\myvec{u} = \frac{\myvec{A}\myvec{v}}{\norm{\myvec{A}\myvec{v}}}, \qquad \sigma = \myvec{u}^{\top}\myvec{A}\myvec{v}
+\end{align}
+This approach is very easy to code and memory-efficient, since it requires only matrix–vector operations.  
+However, it finds only one singular component and needs extensions to handle multiple singular values.
+
+\subsection*{3. Power Iteration with Deflation (Chosen Method)}
+
+To extract multiple singular values, the Power Iteration method can be extended using \textbf{deflation}.  
+After computing the first singular triplet $(\sigma_1, \myvec{u_1}, \myvec{v_1})$, the matrix is updated as
+\begin{align}
+\myvec{A}_1 = \myvec{A} - \sigma_1 \myvec{u_1}\myvec{v_1}^{\top}
+\end{align}
+The next singular value is then found by applying the same process to $\myvec{A}_1$.  
+Repeating this $k$ times gives the truncated decomposition:
+\begin{align}
+\myvec{A_k} = \sum_{i=1}^{k}\sigma_i \myvec{u_i}\myvec{v_i}^{\top}
+\end{align}
+This method is efficient, simple to implement, and requires no external libraries.  
+It directly links theoretical SVD concepts to computational practice, making it ideal for educational and demonstration purposes.  
+Its main limitation is that convergence can slow down when singular values are close together.
+
+\subsection*{4. Lanczos Bidiagonalization}
+
+The Lanczos (or Golub–Kahan) algorithm constructs orthogonal bases for the column and row spaces of $\myvec{A}$ by generating sequences $\{\myvec{u_i}\}$ and $\{\myvec{v_i}\}$ that satisfy
+\begin{align}
+\myvec{A}\myvec{v_i} = \alpha_i \myvec{u_i} + \beta_{i-1}\myvec{u_{i-1}}, \qquad
+\myvec{A}^{\top}\myvec{u_i} = \beta_i \myvec{v_{i+1}} + \alpha_i \myvec{v_i}
+\end{align}
+This process yields a reduced bidiagonal matrix that approximates $\myvec{A}$ and can be used to compute a few of the largest singular values efficiently.  
+It is numerically robust and very fast for large, sparse matrices.  
+However, it requires advanced reorthogonalization and careful numerical handling, making it impractical for basic C-level coding assignments.
+
+\subsection*{5. Randomized SVD}
+
+Randomized SVD uses random projections to approximate the dominant subspace of $\myvec{A}$.  
+It starts with a random Gaussian matrix $\myvec{\Omega}$ and forms
+\begin{align}
+\myvec{Y} = \myvec{A}\myvec{\Omega}
+\end{align}
+Then, the orthonormal basis of $\myvec{Y}$ is computed as
+\begin{align}
+\myvec{Q} = \text{orth}(\myvec{Y})
+\end{align}
+and a smaller SVD is performed on $\myvec{Q}^{\top}\myvec{A}$.  
+This yields an approximate truncated decomposition:
+\begin{align}
+\myvec{A} \approx \myvec{Q}(\myvec{Q}^{\top}\myvec{A})
+\end{align}
+This approach is extremely fast and scalable, suitable for high-dimensional datasets or real-time applications.  
+However, it involves random sampling and additional steps like QR decomposition, which are non-trivial to code in C without numerical libraries.
+
+\subsection*{6. Jacobi SVD Method}
+
+The Jacobi SVD algorithm is conceptually simple and highly accurate.  
+It applies a sequence of Givens rotations that zero out off-diagonal terms in $\myvec{A}^{\top}\myvec{A}$, transforming it into a diagonal form:
+\begin{align}
+\myvec{A}^{\top}\myvec{A} = \myvec{V}\myvec{D}\myvec{V}^{\top}
+\end{align}
+where $\myvec{D}$ is diagonal and its square roots give the singular values.  
+The corresponding left singular vectors are obtained as
+\begin{align}
+\myvec{U} = \myvec{A}\myvec{V}\myvec{\Sigma}^{-1}
+\end{align}
+It is extremely stable and accurate but computationally intensive for large matrices.  
+Its numerous rotation steps make it slower than modern bidiagonal methods.
+
+\subsection*{Summary Comparison}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{2.2cm}|p{2.2cm}|p{2.3cm}|p{3cm}|}
+\hline
+\textbf{Algorithm} & \textbf{Complexity} & \textbf{Accuracy} & \textbf{Memory Use} & \textbf{Ease of Implementation (C)} \\ \hline
+Full SVD + Truncation & $O(mn\min(m,n))$ & Very High & High & Hard \\ \hline
+Power Iteration & $O(mn)$ per singular value & Moderate & Low & Easy \\ \hline
+Power Iteration + Deflation & $O(kmn)$ & Moderate–High & Low & Easy \\ \hline
+Lanczos Bidiagonalization & $O(kmn)$ & High & Moderate & Hard \\ \hline
+Randomized SVD & $O(mn\log k)$ & High (approx.) & Moderate & Medium \\ \hline
+Jacobi SVD & $O(mn\min(m,n))$ & Very High & High & Hard \\ \hline
+\end{tabular}
+\caption{Comparison of six truncated SVD algorithms.}
+\end{table}
+
+\subsection*{Why Power Iteration with Deflation was chosen}
+
+The chosen method offers a balanced trade-off between simplicity, computational efficiency, and clarity.  
+It requires only matrix–vector multiplications, uses little memory, and does not rely on advanced linear algebra libraries.  
+In C, it is compact and transparent, allowing direct control of $k$ and iteration parameters.  
+This method also demonstrates how theoretical matrix decomposition concepts translate to practical image compression.
+
+\subsection*{When Other Methods Are Preferable}
+
+\begin{itemize}
+  \item \textbf{Full SVD or Jacobi SVD:} For maximum accuracy or when all singular values are required.
+  \item \textbf{Lanczos or Randomized SVD:} For large-scale or real-time systems needing only a few top singular values.
+  \item \textbf{Power Iteration:} For conceptual understanding or computing a single dominant singular component.
+\end{itemize}
+
+\noindent
+In conclusion, Power Iteration with Deflation is the most practical choice for this project.  
+It meets the computational constraints, is straightforward to code in C, and clearly illustrates the mathematical principle behind truncated SVD for image compression.
+
+
+\section*{Conclusion}
+
+The SVD-based image compression program was successfully implemented in C using the Power Iteration with Deflation method.  
+The observed results match theoretical expectations — smaller $k$ values yield strong compression but higher reconstruction error, while larger $k$ values produce clearer images with reduced compression benefits.  
+This project demonstrates how mathematical decomposition techniques like SVD can be used effectively in image processing and data reduction.
+
+\end{document}

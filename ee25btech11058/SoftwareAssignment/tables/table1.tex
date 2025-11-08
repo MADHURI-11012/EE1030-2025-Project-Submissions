@@ -1,0 +1,14 @@
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{2.2cm}|p{2.2cm}|p{2.3cm}|p{3cm}|}
+\hline
+\textbf{Algorithm} & \textbf{Complexity} & \textbf{Accuracy} & \textbf{Memory Use} & \textbf{Ease of Implementation (C)} \\ \hline
+Full SVD + Truncation & $O(mn\min(m,n))$ & Very High & High & Hard \\ \hline
+Power Iteration & $O(mn)$ per singular value & Moderate & Low & Easy \\ \hline
+Power Iteration + Deflation & $O(kmn)$ & Moderate–High & Low & Easy \\ \hline
+Lanczos Bidiagonalization & $O(kmn)$ & High & Moderate & Hard \\ \hline
+Randomized SVD & $O(mn\log k)$ & High (approx.) & Moderate & Medium \\ \hline
+Jacobi SVD & $O(mn\min(m,n))$ & Very High & High & Hard \\ \hline
+\end{tabular}
+\caption{Comparison of six truncated SVD algorithms.}
+\end{table}
