@@ -1,0 +1,404 @@
+\let\negmedspace\undefined
+\let\negthickspace\undefined
+\documentclass[journal]{IEEEtran}
+\usepackage[a5paper, margin=10mm, onecolumn]{geometry}
+%\usepackage{lmodern} % Ensure lmodern is loaded for pdflatex
+\usepackage{tfrupee} % Include tfrupee package
+
+\setlength{\headheight}{1cm} % Set the height of the header box
+\setlength{\headsep}{0mm}     % Set the distance between the header box and the top of the text
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{txfonts}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{gensymb}
+\usepackage{comment}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage{tkz-euclide} 
+\usepackage{listings}
+% \usepackage{gvv}                                        
+\def\inputGnumericTable{}                                 
+\usepackage[latin1]{inputenc}                                
+\usepackage{color}                                            
+\usepackage{array}                                            
+\usepackage{longtable}                                       
+\usepackage{calc}                                             
+\usepackage{multirow}                                         
+\usepackage{hhline}                                           
+\usepackage{ifthen}                                           
+\usepackage{lscape}
+\usepackage{multicol}
+\begin{document}
+
+\bibliographystyle{IEEEtran}
+\vspace{3cm}
+
+\title{Software Project}
+\author{EE25BTECH11012-BEERAM MADHURI}
+% \maketitle
+% \newpage
+% \bigskip
+{\let\newpage\relax\maketitle}
+
+\renewcommand{\thefigure}{\theenumi}
+\renewcommand{\thetable}{\theenumi}
+\setlength{\intextsep}{10pt} % Space between text and floats
+
+
+\numberwithin{equation}{enumi}
+\numberwithin{figure}{enumi}
+\renewcommand{\thetable}{\theenumi}
+
+\section*{\textbf{Computing SVD of matrix A}}
+\section*{\textbf{Summary of Strang's video}}
+\textbf{Goal:}
+$A = U \Sigma V^\top$ \\
+Express matrix $A$ as product of $U$, $\Sigma$, $V^\top$ matrices \\
+Where, 
+\begin{align*}
+U = Orthogonal matrix \\
+V = Orthogonal matrix \\
+\Sigma= diagonal matrix \\[1em]
+\Sigma = \begin{bmatrix}
+\sigma_1 & & \\
+& \sigma_2 & \\
+& & \ddots
+\end{bmatrix} \\
+\end{align*}
+\textbf{Computation:}\\
+let $u_1, u_2 \dots u_m$ be the unit vectors in the column space of $A$\\
+$v_1, v_2 \dots v_n$ are the unit vectors in row space of $A$ \\[1em]
+then, we are taking the typical vectors
+\begin{align*}
+\sigma_1 u_1 = A v_1 \\
+\sigma_2 u_2 = A v_2 \\
+\vdots \\
+\sigma_r u_r = A v_r
+\end{align*}
+$u_1, u_2 \dots u_r$ are orthogonal to each other. \\
+$v_1, v_2 \dots v_r$ are orthogonal to each other. 
+\begin{align*}
+A \begin{bmatrix} v_1 & v_2 & v_3 & \dots & v_r \end{bmatrix} = \begin{bmatrix} u_1 & u_2 & \dots & u_r \end{bmatrix}
+\begin{bmatrix}
+\sigma_1 & 0 & 0 & \dots \\
+0 & \sigma_2 & & \dots \\
+\vdots & & \ddots & \\
+\end{bmatrix}
+\end{align*}
+$\therefore$ We have to find the orthonormal basis in the row space and  orthonormal basis in the column space of $A$ such that \\
+\begin{align*}
+    AV = U \Sigma
+\end{align*}
+as V and U are Orthogonal Matrices
+\begin{align*}
+    UU^\top=I\\
+    VV^\top=I\\
+    AVV^\top=U\Sigma V^\top\\
+    A=U\Sigma V^\top
+\end{align*}
+Multiplying $A^\top$ with A
+\begin{align*}
+    A^\top A=(V\Sigma ^\top U^\top)(U\Sigma V^\top)\\
+   A^\top A=V\Sigma ^\top (U^\top U)\Sigma V^\top\\
+A^\top A=V\Sigma^\top \Sigma V^\top\\
+    A^\top A=V \begin{pmatrix}
+        \sigma_1 ^2 & 0&0 \cdots\\
+        0&\sigma_2 ^2 & 0\cdots\\
+        0&0&\sigma_2 ^2 \cdots\\
+        \vdots & & \ddots & \\
+    \end{pmatrix}V^\top
+\end{align*}
+let $A^\top$A =B and $\Sigma^\top \Sigma=M$\\
+$B=VMV^\top$\\
+In the same way 
+\begin{align*}
+    AA^\top = U\begin{pmatrix}
+        \sigma_1 ^2 & 0&0 \cdots\\
+        0&\sigma_2 ^2 & 0\cdots\\
+        0&0&\sigma_2 ^2 \cdots\\
+        \vdots & & \ddots & \\
+    \end{pmatrix}U^\top
+\end{align*}
+$\therefore$ V is the Eigen vector matrix of matrix $A^\top$A\\
+$\therefore$ $\Sigma$ is the diagonal matrix with eigen values of $A^\top A$ as it's diagonal entries. \\
+$\therefore$ U is the Eigen vector matrix of matrix $AA^\top$\\
+here,\\
+$V_1, V_2, \cdots V_r$ are the orthonormal basis for rowspace of $A$.\\
+$U_1, U_2, \cdots U_r$ are the orthonormal basis for columnspace of $A$.\\
+$V_(r+1), \cdots V_n$ are the orthonormal basis for nullspace of $A$.\\
+$U_(r+1),\cdots U_m$ are the orthonormal basis for nullspace of $A^\top$.\\
+\section*{\textbf{Explaination of Implemented Algorithm}}
+Power iteration with matrix deflation is done by svd.c code.\\
+\begin{enumerate}
+    \item The inner loop that calculates $v_new = matrix_multiply(A_T A v)$ is the power iteration. It's a method to find the dominant eigenvector (the $v_1$ corresponding to the largest singular value) of the matrix $A^\top A$.\\
+ \item After finding the top singular triplet $(\sigma_1, u_1, v_1)$, we do two things:\\
+ Reconstruct: We add this rank-1 matrix ($A_1 = \sigma_1 u_1 v_1^T$) to our final image, $A_k$.\\
+ Deflate: We subtract that same rank-1 matrix from our temporary matrix ($A_temp = A_temp - A_1$).\\
+  \item The main for loop repeats this $k$ times. On the second iteration, the power method automatically finds the next largest singular value/vector triplet because we've already "deflated" (removed) the first one.
+ \end{enumerate}
+\section*{\textbf{Why Power Iteration Algorithm over other algorithms}}
+I studied about the following algorithms:
+\begin{enumerate}
+    \item Jacobi SVD Algorithm
+    \item Golub-Kahan Algorithm
+    \item Power Iteration
+\end{enumerate}
+\textbf{1. Jacobi SVD Algorithm:}\\
+This algorithm applies a series of rotations to diagonalize the matrix\\
+in this first we compute $A^\top A$\\
+then apply Jacobi rotation :
+\begin{align*}
+    G^\top (A^\top A)G=diagonal\\
+    \text{where, } G=\begin{pmatrix}
+        \cos\theta & -\sin\theta\\
+        \sin \theta & \cos\theta
+    \end{pmatrix}
+\end{align*}
+equate non diagonal elements to zero to find the value of theta.\\
+then the root of diagonal elements of this matrix gives $\sigma_1, \sigma_2$ etc.
+\begin{align*}
+    V=G\\
+    U=AV\Sigma^-1
+\end{align*}
+It computes all singular values even if we require only some k values.\\
+We have to write code to "sweep" through the matrix, calculate the correct rotation angles for each step, and update two other matrices ($U$ and $V$) at every single step.\\
+\textbf{2. Golub-Kahan Algorithm:}\\
+Instead of directly computing 
+$U,\Sigma,V $, we do it in two major steps:\\
+1. Bidiagonalization using Householder transformations\\
+We reduce A to a bidiagonal matrix B, such that:
+\begin{align*}
+    A =PBQ^\top
+\end{align*}
+where:\\
+P and Q are orthogonal,\\
+B has nonzero entries only on its main diagonal and superdiagonal.\\
+2.Compute the SVD of the bidiagonal matrix B\\
+Once A is reduced to B, we use a Golub-Kahan SVD iteration (a stable QR-like method) to diagonalize B to find \\
+U,$\Sigma ,V$.\\
+uses implicit QR steps on $B^\top B$,\\
+converges to the diagonal matrix of singular values $\Sigma$
+After Iteration we get:
+\begin{align*}
+    B=U_B\Sigma V_B^\top\\
+    A=(PU_B)\Sigma (QV_B)\\
+    A=U\Sigma V\\
+    \text{where,} U=PU_B\\
+    V=QV_B
+\end{align*}
+it is extremely complex.\\
+Just like Jacobi, it's designed to compute the Full SVD, which is not our goal.\\
+\textbf{3. Power Iteration Algorithm:}\\
+In this process, we find the largest eigen value and eigen vector of $\vec{A^\top A}$
+For Example:\\
+let 
+\begin{align*}
+    \vec{A}=\begin{bmatrix}
+        1 &1\\0 &1
+    \end{bmatrix}
+\end{align*}
+The power iteration finds the largest eigenvector of $A^T A$.
+\textbf{Calculate $A^T A$:}
+    $$
+    A^T = \begin{bmatrix} 1 & 0 \\ 1 & 1 \end{bmatrix}
+    \quad
+    A^T A = \begin{bmatrix} 1 & 0 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix}
+    $$
+
+ \textbf{Pick a random starting vector $\mathbf{v}_0$:} Let's start with
+    $$
+    \mathbf{v}_0 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}.
+    $$
+
+\textbf{Iterate:} $\mathbf{v}_{\text{new}} = (A^T A) \cdot \mathbf{v}_{\text{old}}$
+    \begin{itemize}
+        \item \textbf{Iteration 1:} $\mathbf{v}' = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 2 \\ 3 \end{bmatrix}$
+        \quad Normalize it:
+        $$
+        \lVert \mathbf{v}' \rVert = \sqrt{2^2 + 3^2} = \sqrt{13} \approx 3.605
+        $$
+        $$
+        \mathbf{v}_1 = \begin{bmatrix} 2/3.605 \\ 3/3.605 \end{bmatrix} = \begin{bmatrix} 0.555 \\ 0.832 \end{bmatrix}
+        $$
+
+        \item \textbf{Iteration 2:} $\mathbf{v}' = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} 0.555 \\ 0.832 \end{bmatrix} = \begin{bmatrix} 1.387 \\ 2.219 \end{bmatrix}$
+        \quad Normalize it:
+        $$
+        \lVert \mathbf{v}' \rVert = \sqrt{1.387^2 + 2.219^2} \approx 2.617
+        $$
+        $$
+        \mathbf{v}_2 = \begin{bmatrix} 1.387/2.617 \\ 2.219/2.617 \end{bmatrix} = \begin{bmatrix} 0.530 \\ 0.848 \end{bmatrix}
+        $$
+    \item \textbf{Iteration 3:}
+    $$
+    \mathbf{v}' = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} 0.530 \\ 0.848 \end{bmatrix} = \begin{bmatrix} 1.378 \\ 2.226 \end{bmatrix}
+    \quad \text{Normalize it:} \quad \lVert \mathbf{v}' \rVert = \sqrt{1.378^2 + 2.226^2} \approx 2.618
+    $$
+    $$
+    \mathbf{v}_3 = \begin{bmatrix} 1.378/2.618 \\ 2.226/2.618 \end{bmatrix} = \begin{bmatrix} 0.526 \\ 0.850 \end{bmatrix}
+    $$
+\end{itemize}
+
+The vector is converging! We can stop here. This is our first right singular vector, $\mathbf{v}_1$.
+$$
+\mathbf{v}_1 = \begin{bmatrix} 0.526 \\ 0.850 \end{bmatrix}
+$$
+
+\begin{itemize}
+    \item $\mathbf{u}'_1 = A \mathbf{v}_1 = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 0.526 \\ 0.850 \end{bmatrix} = \begin{bmatrix} 1.376 \\ 0.850 \end{bmatrix}$
+\\
+    \item $\sigma_1 = \lVert \mathbf{u}'_1 \rVert = \sqrt{1.376^2 + 0.850^2} \approx \sqrt{2.616} \approx 1.618$
+\\
+    \item $\mathbf{u}_1 = \mathbf{u}'_1 / \sigma_1 = \frac{1}{1.618} \begin{bmatrix} 1.376 \\ 0.850 \end{bmatrix} = \begin{bmatrix} 1.376/1.618 \\ 0.850/1.618 \end{bmatrix} = \begin{bmatrix} 0.850 \\ 0.525 \end{bmatrix}$
+\end{itemize}
+
+We have found the largest singular triplet:
+$(\sigma_1, \mathbf{u}_1, \mathbf{v}_1)$\\\\
+Hence I chose this method as we can find the top k eigen values and eigen vectors by applying power iteration and matrix deflation k times. which results in largest k eien values and forms new $A_k$ matrix.
+(Matrix deflation: Subtract this triplet's information from the matrix, creating a new, "deflated" matrix.)\\($A_{new} = A - A_1$ \\
+$A_1 = \sigma_1 u_1 v_1^\top$)
+
+\section*{\textbf{Error Analysis}}
+for error analysis I used Frobenuis norm.\\
+For an $m \times n$ matrix $A$, with elements $a_{ij}$ the Frobenius norm is defined as the square root of the sum of the absolute squares of all its elements:
+\begin{align*}
+\|A\|_F = \sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n} |a_{ij}|^2}
+\end{align*}
+we calculate the Forbenius norm of the actual image matrix($\|A\|_F$) and the matrices generated for different k values($\|A_k\|_F$) then error is:
+\begin{align*}
+    error =\|A- A_k\|_F\\
+    \text{Relative error}=(\|A - A_k\|_F)/\|A\|_F \\
+    \text{Percentage error}= \text{Relative error} *100
+\end{align*}
+\begin{table}[h!]
+    \centering
+    \input{tables/tables1}
+    \caption{Observations and errors for globe.jpg}
+    \label{table 1.4.28}
+\end{table}
+\begin{table}[h!]
+    \centering
+    \input{tables/tables2}
+    \caption{Observations and errors for einstein.jpg}
+    \label{table 1.4.28}
+\end{table}
+\begin{table}[h!]
+    \centering
+    \input{tables/tables3}
+    \caption{Observations and errors for greyscale.png}
+    \label{table 1.4.28}
+\end{table}
+\section*{\textbf{Trade-offs and reflections on Implementation choice-Power Iteration algorithm with matrix Deflation}}
+\textbf{Pros:}\\
+Simple to Implement:\\
+The code that I used just uses the for loop containing a matrix-vector multiplication so it's easier to implement.\\
+Efficient for this Project:\\
+As our goal is to find different matrices with top k eigen values but not Full SVD, power iteration fits very good. It's fast if k is much smaller than the image dimensions than that of calculating whole SVD.\\\\
+\textbf{Cons:}\\
+Can have numerical stability issues as errors accumulate during deflation the matrix.\\
+\section*{Observation}
+1. As the value of k increases image quality increases.\\
+2. As the value of k decreases image compression increases.\\
+\section*{Approximate Images for different values of k}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{figs/globe.jpg}
+    \caption{given Globe Image}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\columnwidth]{figs/globe_approx_k10.jpg}
+    \caption{k=10}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\columnwidth]{figs/globe_approx_k20.jpg}
+    \caption{k=20}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\columnwidth]{figs/globe_approx_k30.jpg}
+    \caption{k=30}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\columnwidth]{figs/globe_approx_k50.jpg}
+    \caption{k=50}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/einstein.jpg}
+    \caption{Given Einstein Image}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/Einstein_approx_k5.jpg}
+    \caption{k=5}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/Einstein_approx_k10.jpg}
+    \caption{k=10}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/Einstein_approx_k20.jpg}
+    \caption{k=20}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/Einstein_approx_k40.jpg}
+    \caption{k=40}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/greyscale.png}
+    \caption{Given Greyscale image}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/greyscale_approx_k5.jpg}
+    \caption{k=5}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/greyscale_approx_k10.jpg}
+    \caption{k=10}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/greyscale_approx_k20.jpg}
+    \caption{k=20}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{figs/greyscale_approx_k50.jpg}
+    \caption{k=50}
+    \label{fig:placeholder}
+\end{figure}
+
+\end{document}
